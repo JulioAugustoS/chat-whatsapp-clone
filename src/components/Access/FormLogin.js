@@ -34,7 +34,7 @@ const FormLogin = props => (
       }}
       ref={props.refEmail}
       onSubmitEditing={props.submitEditingEmail}
-      onChangeText={props.changeEmail}
+      onChangeText={props.emailChange}
       errorMessage={props.errorMessageEmail}
     />
     <Input 

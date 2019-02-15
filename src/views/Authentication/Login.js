@@ -7,10 +7,13 @@ import {
   UIManager,
   KeyboardAvoidingView
 } from 'react-native';
+import { connect } from 'react-redux';
 import { Button } from 'react-native-elements';
 import Styles from '../../components/Access/Styles';
 import FormLogin from '../../components/Access/FormLogin';
 import FormRegister from '../../components/Access/FormRegister';
+
+import { changeEmail } from '../../actions/AuthenticationActions';
 
 const BG_IMAGE = require('../../assets/images/bg_screen1.jpg');
 
@@ -30,8 +33,6 @@ class Login extends Component {
     super(props);
 
     this.state = { 
-      email: '',
-      password: '',
       isLoading: false,
       selectedCategory: 0,
       isEmailValid: true,
@@ -87,16 +88,16 @@ class Login extends Component {
   }
 
   render(){
+    console.log(this.props);
     const { 
       isLoading, 
       selectedCategory,
       isEmailValid,
       isPasswordValid,
       isConfirmationValid,
-      email,
-      password,
       passwordConfirmation
     } = this.state;
+
     const isLoginPage = selectedCategory === 0;
     const isSignUpPage = selectedCategory === 1;
     return (
@@ -144,14 +145,14 @@ class Login extends Component {
               </View>
               <View style={Styles.formContainer}>
                 <FormLogin 
-                  valueEmail={email}
+                  valueEmail={this.props.email}
                   refEmail={input => (this.emailInput = input)}
                   submitEditingEmail={() => this.passwordInput.focus()}
-                  changeEmail={email => this.setState({ email })}
+                  emailChange={text => this.props.changeEmail(text)}
                   errorMessageEmail={
                     isEmailValid ? null : 'Informe um email valido'
                   }
-                  valuePass={password}
+                  valuePass={this.props.password}
                   keyTypePass={isSignUpPage ? 'next' : 'done'}
                   refPass={input => (this.passwordInput = input)}
                   submitEditingPass={() => 
@@ -210,4 +211,9 @@ class Login extends Component {
   }
 }
 
-export default Login;
+const mapStateToProps = state => ({
+  email: state.Authentication.email,
+  password: state.Authentication.password
+})
+
+export default connect(mapStateToProps, { changeEmail })(Login);
