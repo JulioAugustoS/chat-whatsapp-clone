@@ -30,6 +30,7 @@ const FormLogin = props => (
       inputStyle={{ marginLeft: 10 }}
       placeholder={'Email'}
       containerStyle={{
+        marginTop: 16,
         borderBottomColor: 'rgba(0, 0, 0, 0.38)',
       }}
       ref={props.refEmail}

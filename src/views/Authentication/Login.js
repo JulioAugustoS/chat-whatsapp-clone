@@ -8,12 +8,18 @@ import {
   KeyboardAvoidingView
 } from 'react-native';
 import { connect } from 'react-redux';
-import { Button } from 'react-native-elements';
+import { Button, Input } from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome5';
 import Styles from '../../components/Access/Styles';
 import FormLogin from '../../components/Access/FormLogin';
 import FormRegister from '../../components/Access/FormRegister';
 
-import { changeEmail } from '../../actions/AuthenticationActions';
+import { 
+  changeName,
+  changeEmail, 
+  changePassword,
+  userRegister
+} from '../../actions/AuthenticationActions';
 
 const BG_IMAGE = require('../../assets/images/bg_screen1.jpg');
 
@@ -60,35 +66,55 @@ class Login extends Component {
 
   login = () => {
     const { email, password } = this.state;
-    this.setState({ isLoading: true });
+    // this.setState({ isLoading: true });
 
-    setTimeout(() => {
-      LayoutAnimation.easeInEaseOut();
-      this.setState({
-        isLoading: false,
-        isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
-        isPasswordValid: password.length >= 8 || this.passwordInput.shake()
-      })
-    }, 1500);
+    // setTimeout(() => {
+    //   LayoutAnimation.easeInEaseOut();
+    //   this.setState({
+    //     isLoading: false,
+    //     isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
+    //     isPasswordValid: password.length >= 8 || this.passwordInput.shake()
+    //   })
+    // }, 1500);
   }
 
   signUp = () => {
-    const { email, password, passwordConfirmation } = this.state;
+    const { passwordConfirmation } = this.state;
+    const { name, email, password } = this.props;
+
+    LayoutAnimation.easeInEaseOut();
     this.setState({ isLoading: true });
 
-    setTimeout(() => {
-      LayoutAnimation.easeInEaseOut();
+    if(!this.validateEmail(email)){
+      this.setState({ 
+        isLoading: false,
+        isEmailValid: this.validateEmail(email) || this.emailInput.shake() 
+      })
+    }
+
+    if(password.length < 6){
       this.setState({
         isLoading: false,
-        isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
-        isPasswordValid: password.length >= 8 || this.passwordInput.shake(),
-        isConfirmationValid: password === passwordConfirmation || this.confirmationInput.shake()
+        isPasswordValid: password.length >= 8 || this.passwordInput.shake()
+      })
+    }
+
+    if(password === passwordConfirmation){
+      this.setState({ isLoading: false });
+      this.props.userRegister({
+        name,
+        email,
+        password
       });
-    }, 1500);
+    }else{
+      this.setState({
+        isLoading: false,
+        isConfirmationValid: password === passwordConfirmation || this.confirmationInput.shake()
+      })
+    }
   }
 
   render(){
-    console.log(this.props);
     const { 
       isLoading, 
       selectedCategory,
@@ -144,6 +170,28 @@ class Login extends Component {
                 <TabSelector selected={isSignUpPage} />
               </View>
               <View style={Styles.formContainer}>
+                { isSignUpPage && (
+                <Input 
+                  leftIcon={
+                    <Icon 
+                      name="user"
+                      color="rgba(0, 0, 0, 0.38)"
+                      size={26}
+                      style={{ backgroundColor: 'transparent' }}
+                    />
+                  }
+                  value={this.props.name}
+                  keyboardAppearance="light"
+                  autoFocus={false}
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  inputStyle={{ marginLeft: 10 }}
+                  placeholder={'Nome'}
+                  containerStyle={{
+                    borderBottomColor: 'rgba(0, 0, 0, 0.38)',
+                  }}
+                  onChangeText={text => this.props.changeName(text)}
+                /> ) }
                 <FormLogin 
                   valueEmail={this.props.email}
                   refEmail={input => (this.emailInput = input)}
@@ -160,11 +208,11 @@ class Login extends Component {
                       ? this.confirmationInput.focus()
                       : this.login()
                   }
-                  changePass={password => this.setState({ password })}
+                  changePass={password => this.props.changePassword(password)}
                   errorMessagePass={
                     isPasswordValid
                       ? null 
-                      : 'A senha deve ter no minimo 8 caracteres'
+                      : 'A senha deve ter no minimo 6 caracteres'
                   }
                 />
                 { isSignUpPage && (
@@ -178,7 +226,7 @@ class Login extends Component {
                       errorMessage={
                         isConfirmationValid
                           ? null
-                          : 'Por favor repita a senha'
+                          : 'As senhas informadas não correspondem!'
                       }
                     />
                   )
@@ -212,8 +260,17 @@ class Login extends Component {
 }
 
 const mapStateToProps = state => ({
+  name: state.Authentication.name,
   email: state.Authentication.email,
-  password: state.Authentication.password
+  password: state.Authentication.password,
+  error: state.Authentication.error,
 })
 
-export default connect(mapStateToProps, { changeEmail })(Login);
+export default connect(
+  mapStateToProps, 
+  { 
+    changeName,
+    changeEmail, 
+    changePassword,
+    userRegister 
+  })(Login);
