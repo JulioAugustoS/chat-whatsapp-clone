@@ -66,13 +66,8 @@ class Login extends Component {
   }
 
   login = () => {
-    const { email, password, error } = this.props;
+    const { email, password } = this.props;
     this.props.userAuthentication({ email, password });
-
-    if(error !== ''){
-      this.emailInput.shake();
-      this.passwordInput.shake();
-    }
   }
 
   signUp = () => {

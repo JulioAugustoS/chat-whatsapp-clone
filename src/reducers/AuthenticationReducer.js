@@ -6,6 +6,7 @@ import {
   USER_REGISTER_SUCCESS,
   USER_AUTH_ERROR,
   USER_AUTH_SUCCESS,
+  PROGRESS_REGISTER,
   PROGRESS_LOGIN
 } from '../actions/types';
 
@@ -14,7 +15,8 @@ const initialState = {
   email: '',
   password: '',
   error: '',
-  loading: false
+  loading: false,
+  isAuthenticated: false
 };
 
 export default function(state = initialState, action) {
@@ -27,13 +29,15 @@ export default function(state = initialState, action) {
     case CHANGE_PASSWORD:
       return { ...state, password: action.payload }
     case USER_REGISTER_ERROR:
-      return { ...state, error: action.payload}
+      return { ...state, error: action.payload, loading: false}
     case USER_REGISTER_SUCCESS:
-      return { ...state, name: '', password: '', error: '' }
+      return { ...state, name: '', password: '', error: '', loading: false }
     case USER_AUTH_ERROR:
       return { ...state, error: action.payload, loading: false }
     case USER_AUTH_SUCCESS: 
-      return { ...state, error: '', loading: false }
+      return { ...state, error: '', loading: false, isAuthenticated: true }
+    case PROGRESS_REGISTER: 
+      return { ...state, error: '', loading: true }
     case PROGRESS_LOGIN: 
       return { ...state, error: '', loading: true }
     default:

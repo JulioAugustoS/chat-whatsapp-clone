@@ -1,3 +1,4 @@
+import { AsyncStorage } from 'react-native';
 import firebase from 'firebase';
 import {
   CHANGE_NAME,
@@ -7,7 +8,8 @@ import {
   USER_REGISTER_SUCCESS,
   USER_AUTH_ERROR,
   USER_AUTH_SUCCESS,
-  PROGRESS_LOGIN
+  PROGRESS_LOGIN,
+  PROGRESS_REGISTER
 } from './types'; 
 import { Actions } from 'react-native-router-flux';
 import b64 from 'base-64';
@@ -35,6 +37,8 @@ export const changePassword = (value) => {
 
 export const userRegister = ({ name, email, password }) => {
   return dispatch => {
+    dispatch({ type: PROGRESS_REGISTER })
+
     firebase.auth().createUserWithEmailAndPassword(email, password)
       .then(user => {
         let emailCript = b64.encode(email);
@@ -42,7 +46,6 @@ export const userRegister = ({ name, email, password }) => {
         firebase.database().ref(`/contatos/${emailCript}`)
           .push({ name })
           .then(value => {
-            console.log(value)
             dispatch({ type: USER_REGISTER_SUCCESS });
             Actions.welcome({});
           })
@@ -62,10 +65,7 @@ export const userAuthentication = ({ email, password }) => {
 
     firebase.auth().signInWithEmailAndPassword(email, password)
       .then(value => {
-        dispatch({
-          type: USER_AUTH_SUCCESS
-        });
-        Actions.home({});
+        authSuccess(dispatch);
       })
       .catch(error => 
         dispatch({
@@ -74,4 +74,11 @@ export const userAuthentication = ({ email, password }) => {
         })
       );
   }
+}
+
+const authSuccess = async (dispatch) => {
+  dispatch({ type: USER_AUTH_SUCCESS });
+
+  await AsyncStorage.setItem('@Authentication', 'true');
+  Actions.chats({});
 }
