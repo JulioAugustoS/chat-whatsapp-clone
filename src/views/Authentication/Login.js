@@ -18,7 +18,8 @@ import {
   changeName,
   changeEmail, 
   changePassword,
-  userRegister
+  userRegister,
+  userAuthentication
 } from '../../actions/AuthenticationActions';
 
 const BG_IMAGE = require('../../assets/images/bg_screen1.jpg');
@@ -65,17 +66,13 @@ class Login extends Component {
   }
 
   login = () => {
-    const { email, password } = this.state;
-    // this.setState({ isLoading: true });
+    const { email, password, error } = this.props;
+    this.props.userAuthentication({ email, password });
 
-    // setTimeout(() => {
-    //   LayoutAnimation.easeInEaseOut();
-    //   this.setState({
-    //     isLoading: false,
-    //     isEmailValid: this.validateEmail(email) || this.emailInput.shake(),
-    //     isPasswordValid: password.length >= 8 || this.passwordInput.shake()
-    //   })
-    // }, 1500);
+    if(error !== ''){
+      this.emailInput.shake();
+      this.passwordInput.shake();
+    }
   }
 
   signUp = () => {
@@ -141,11 +138,11 @@ class Login extends Component {
               </View>
               <View style={{ flexDirection: 'row' }}>
                 <Button
-                  disabled={isLoading}
+                  disabled={this.props.loading}
                   clear
                   activeOpacity={0.7}
                   onPress={() => this.selectCategory(0)}
-                  containerStyle={{ flex: 1 }}
+                  containerStyle={{ flex: 1, marginHorizontal: 10 }}
                   titleStyle={[
                     Styles.categoryText,
                     isLoginPage && Styles.selectedCategoryText,
@@ -153,11 +150,11 @@ class Login extends Component {
                   title={'Entrar'}
                 />
                 <Button 
-                  disabled={isLoading}
+                  disabled={this.props.loading}
                   clear
                   activeOpacity={0.7}
                   onPress={() => this.selectCategory(1)}
-                  containerStyle={{ flex: 1 }}
+                  containerStyle={{ flex: 1, marginHorizontal: 10 }}
                   titleStyle={[
                     Styles.categoryText,
                     isSignUpPage && Styles.selectedCategoryText
@@ -231,6 +228,14 @@ class Login extends Component {
                     />
                   )
                 }
+                <Text style={{ marginTop: 10, color: 'red', fontWeight: 'bold', textAlign: 'center', paddingHorizontal: 10 }}>
+                  {this.props.error === 'auth/user-not-found'
+                    ? 'Email informado não cadastrado em nossa base de dados!' 
+                    : this.props.error === 'auth/wrong-password'
+                      ? 'Email ou senha incorreto, tente novamente!' 
+                      : this.props.error
+                  }
+                </Text>
                 <Button 
                   buttonStyle={Styles.loginButton}
                   containerStyle={{ marginTop: 32, flex: 0 }}
@@ -238,8 +243,8 @@ class Login extends Component {
                   title={isLoginPage ? 'Entrar' : 'Cadastrar'}
                   onPress={isLoginPage ? this.login : this.signUp}
                   titleStyle={Styles.loginTextButton}
-                  loading={isLoading}
-                  disabled={isLoading}
+                  loading={this.props.loading}
+                  disabled={this.props.loading}
                 />
               </View>
             </KeyboardAvoidingView>
@@ -264,6 +269,7 @@ const mapStateToProps = state => ({
   email: state.Authentication.email,
   password: state.Authentication.password,
   error: state.Authentication.error,
+  loading: state.Authentication.loading
 })
 
 export default connect(
@@ -272,5 +278,6 @@ export default connect(
     changeName,
     changeEmail, 
     changePassword,
-    userRegister 
+    userRegister,
+    userAuthentication
   })(Login);
